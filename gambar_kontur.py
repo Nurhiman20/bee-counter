@@ -13,10 +13,12 @@ while True:
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     l_b = np.array([34, 50, 30])
-    u_b = np.array([84, 255, 106])
+    u_b = np.array([89, 255, 95])
     mask = cv2.inRange(hsv, l_b, u_b)
 
-    _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    # _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    
+    contours,hierachy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
 
     # res = cv2.bitwise_and(frame, frame, mask=mask)
