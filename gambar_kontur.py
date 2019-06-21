@@ -20,11 +20,18 @@ while True:
     
     contours,hierachy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
+    
+    kernel = np.ones((15,15), np.float32)/255
+    
+    # dilation = cv2.dilate(frame, kernel, iterations = 1)
+    opening = cv2.morphologyEx(frame, cv2.MORPH_OPEN, kernel)
 
     # res = cv2.bitwise_and(frame, frame, mask=mask)
 
     cv2.imshow("frame", frame)
     cv2.imshow("mask", mask)
+    # cv2.imshow("dilation", dilation)
+    cv2.imshow("opening", opening)
     # cv2.imshow("res", res)
 
     key = cv2.waitKey(1)
