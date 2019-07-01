@@ -8,7 +8,7 @@ body {
 
 /* navbar */
 .navbar-custom {
-  background-color: #4F6984; }
+  background-color: rgb(60, 80, 100); }
 
 /* change the brand and text color */
 .navbar-custom .navbar-brand,
@@ -27,6 +27,13 @@ body {
 .navbar-custom .navbar-nav img {
   height: 25px;
   margin-right: 10px; }
+  
+.navbar-brand {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: bold;
+  text-align: center;
+  font-size: 20px !important;
+}
 
 /*
  * Sidebar
@@ -90,6 +97,11 @@ body {
 .main {
   background-color: #E4EBF3;
 }
+
+.fa-lg {
+  margin-right: 15px;
+}
+
 /*
  * Navbar
  */
