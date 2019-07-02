@@ -5,7 +5,6 @@ def nothing(x):
     pass
 
 cap = cv2.VideoCapture(0)
-#sudo modprobe bcm2835-4l2
 
 fps, width, height = cap.get(cv2.CAP_PROP_FPS), cap.get(
     cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -14,27 +13,34 @@ height = int(height)
 print(fps, width, height)
 
 while True:
-    # frame = cv x2.imread('smarties.png')
+    # mengambil citra
     _, frame = cap.read()
 
+    # konversi warna BGR ke HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
+    # range warna yang harus dideteksi (dalam mode warna HSV)
     l_b = np.array([34, 50, 30])
     u_b = np.array([89, 255, 95])
     mask = cv2.inRange(hsv, l_b, u_b)
-
-    # _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     
+    # gambar kontur
     contours,hierachy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    # hull = [cv2.convexHull(c) for c in contours]
     cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
     
+    # area pertama
     lineypos = 225
-    cv2.line(frame, (0, lineypos), (width, lineypos), (255, 0, 0), 5)
+    cv2.line(frame, (0, lineypos), (width, lineypos), (255, 0, 0), 2)
+    lineypos2 = 235
+    cv2.line(frame, (0, lineypos2), (width, lineypos2), (255, 0, 0), 2)
     
-    lineypos2 = 400
-    cv2.line(frame, (0, lineypos2), (width, lineypos2), (0, 255, 0), 5)
+    # area kedua
+    lineypos3 = 400
+    cv2.line(frame, (0, lineypos3), (width, lineypos3), (0, 255, 0), 2)
+    lineypos4 = 410
+    cv2.line(frame, (0, lineypos4), (width, lineypos4), (0, 255, 0), 2)
     
+    # batas ukuran tagging yang terbaca
     minarea = 10
     maxarea = 50000
     
@@ -55,14 +61,17 @@ while True:
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
 
-                if cy > lineypos:  # filters out contours that are above line (y starts at top)
+                if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
+                    print(area)
+
+                elif cy > lineypos:  # filters out contours that are above line (y starts at top)
 
                     # gets bounding points of contour to create rectangle
                     # x,y is top left corner and w,h is width and height
                     x, y, w, h = cv2.boundingRect(cnt)
 
                     # creates a rectangle around contour
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), cv2.mean(frame, mask), 2)
     
     
     kernel = np.ones((15,15), np.float32)/255
