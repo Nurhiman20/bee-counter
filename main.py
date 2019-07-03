@@ -62,7 +62,13 @@ while True:
 
             area = cv2.contourArea(contours[i])  # luas kontur
 
-            if minarea < area < maxarea: 
+            if minarea < area < maxarea:
+                # menghitung centroid kontur
+                cnt = contours[i]
+                M = cv2.moments(cnt)
+                cx = int(M['m10'] / M['m00'])
+                cy = int(M['m01'] / M['m00'])
+
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
                     print(area)
 
