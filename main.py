@@ -18,11 +18,20 @@ while True:
 
     # konversi warna BGR ke HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
+    
+    # morphological transformation, opening    
+    kernel = np.ones((15,15), np.float32)/255
+    
+    opening = cv2.morphologyEx(frame, cv2.MORPH_OPEN, kernel)
+    
     # range warna yang harus dideteksi (dalam mode warna HSV)
-    l_b = np.array([34, 50, 30])
-    u_b = np.array([89, 255, 95])
-    mask = cv2.inRange(hsv, l_b, u_b)
+    l_hijau = np.array([34, 50, 30])
+    u_hijau = np.array([89, 255, 95])
+    l_kuning = np.array([14, 110, 85])
+    u_kuning = np.array([55, 255, 139])
+    hijau = cv2.inRange(hsv, l_hijau, u_hijau)
+    kuning = cv2.inRange(hsv, l_kuning, u_kuning)
+    mask = cv2.bitwise_or(hijau, kuning)
     
     # gambar kontur
     contours,hierachy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -47,46 +56,28 @@ while True:
     cxx = np.zeros(len(contours))
     cyy = np.zeros(len(contours))
 
-    for i in range(len(contours)):  # cycles through all contours in current frame
+    for i in range(len(contours)):  # looping pada semua kontur dalam frame
 
-        if hierachy[0, i, 3] == -1:  # using hierarchy to only count parent contours (contours not within others)
+        if hierachy[0, i, 3] == -1:  # hierachy untuk hanya menghitung pada kontur induk
 
-            area = cv2.contourArea(contours[i])  # area of contour
+            area = cv2.contourArea(contours[i])  # luas kontur
 
-            if minarea < area < maxarea:  # area threshold for contour
-
-                # calculating centroids of contours
-                cnt = contours[i]
-                M = cv2.moments(cnt)
-                cx = int(M['m10'] / M['m00'])
-                cy = int(M['m01'] / M['m00'])
-
+            if minarea < area < maxarea: 
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
                     print(area)
 
-                elif cy > lineypos:  # filters out contours that are above line (y starts at top)
+                elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
-                    # gets bounding points of contour to create rectangle
-                    # x,y is top left corner and w,h is width and height
+                    # mendapatkan nilai titik sudut untuk menggambar kontur persegi
+                    # x,y adalah sudut kiri atas dan w,h adalah lebar dan tinggi
                     x, y, w, h = cv2.boundingRect(cnt)
 
-                    # creates a rectangle around contour
+                    # membuat kotak yang melingkupi setiap kontur
                     cv2.rectangle(frame, (x, y), (x + w, y + h), cv2.mean(frame, mask), 2)
-    
-    
-    kernel = np.ones((15,15), np.float32)/255
-    
-    # dilation = cv2.dilate(frame, kernel, iterations = 1)
-    opening = cv2.morphologyEx(frame, cv2.MORPH_OPEN, kernel)
-
-    # res = cv2.bitwise_and(frame, frame, mask=mask)
 
     cv2.imshow("frame", frame)
-    # cv2.imshow("mask", mask)
-    # cv2.imshow("dilation", dilation)
-    # cv2.imshow("opening", opening)
-    # cv2.imshow("res", res)
 
+    # menutup frame / program
     key = cv2.waitKey(1)
     if key == 27:
         break
