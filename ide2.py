@@ -30,31 +30,31 @@ while True :
     
     # definiskan range warna hijau
     l_hijau = np.array([34, 50, 30])
-    u_hijau = np.array([89, 255, 95])
+    u_hijau = np.array([84, 255, 99])
 
     # definiskan range warna kuning
-    l_kuning = np.array([14, 110, 85])
-    u_kuning = np.array([55, 255, 139])
+    l_kuning = np.array([7, 90, 116])
+    u_kuning = np.array([33, 255, 144])
 
     # definiskan range warna merah
-    l_merah = np.array([176, 90, 0])
-    u_merah = np.array([255, 212, 121])
+    l_merah = np.array([175, 85, 82])
+    u_merah = np.array([143, 137, 143])
 
     # menemukan range warna pada citra
     hijau = cv2.inRange(hsv, l_hijau, u_hijau)
     kuning = cv2.inRange(hsv, l_kuning, u_kuning)
     merah = cv2.inRange(hsv, l_merah, u_merah)
-
-    # morphological transformation, opening
-    kernel = np.ones((15,15), np.float32)/255
     
-    hijau = cv2.morphologyEx(hijau, cv2.MORPH_OPEN, kernel)
+    #morphological transformation, dilation
+    kernal = np.ones((5, 5), "uint8")
+    
+    hijau = cv2.dilate(hijau, kernal)
     res = cv2.bitwise_and(frame, frame, mask = hijau)
-
-    kuning = cv2.morphologyEx(kuning, cv2.MORPH_OPEN, kernel)
+    
+    kuning = cv2.dilate(kuning, kernal)
     res1 = cv2.bitwise_and(frame, frame, mask = kuning)
-
-    merah = cv2.morphologyEx(merah, cv2.MORPH_OPEN, kernel)
+    
+    merah = cv2.dilate(merah, kernal)
     res2 = cv2.bitwise_and(frame, frame, mask = merah)
 
     # batas ukuran tagging yang terbaca
