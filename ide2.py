@@ -37,13 +37,23 @@ while True :
     u_kuning = np.array([33, 255, 144])
 
     # definiskan range warna merah
-    l_merah = np.array([175, 85, 82])
-    u_merah = np.array([143, 137, 143])
+    l_merah = np.array([175, 73, 71])
+    u_merah = np.array([188, 156, 151])
+
+    # definiskan range warna biru
+    l_biru = np.array([97, 57, 80])
+    u_biru = np.array([160, 255, 124])
+
+    # definiskan range warna ungu
+    l_ungu = np.array([158, 28, 65])
+    u_ungu = np.array([201, 72, 91])
 
     # menemukan range warna pada citra
     hijau = cv2.inRange(hsv, l_hijau, u_hijau)
     kuning = cv2.inRange(hsv, l_kuning, u_kuning)
     merah = cv2.inRange(hsv, l_merah, u_merah)
+    biru = cv2.inRange(hsv, l_biru, u_biru)
+    ungu = cv2.inRange(hsv, l_ungu, u_ungu)
     
     #morphological transformation, dilation
     kernal = np.ones((5, 5), "uint8")
@@ -56,6 +66,12 @@ while True :
     
     merah = cv2.dilate(merah, kernal)
     res2 = cv2.bitwise_and(frame, frame, mask = merah)
+
+    biru = cv2.dilate(biru, kernal)
+    res3 = cv2.bitwise_and(frame, frame, mask = biru)
+
+    ungu = cv2.dilate(ungu, kernal)
+    res3 = cv2.bitwise_and(frame, frame, mask = ungu)
 
     # batas ukuran tagging yang terbaca
     minarea = 10
@@ -127,6 +143,70 @@ while True :
 
     # tracking warna merah
     contours,hierachy = cv2.findContours(merah, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
+
+    cxx = np.zeros(len(contours))
+    cyy = np.zeros(len(contours))
+
+    for i in range(len(contours)):  # looping pada semua kontur dalam frame
+
+        if hierachy[0, i, 3] == -1:  # hierachy untuk hanya menghitung pada kontur induk
+
+            area = cv2.contourArea(contours[i])  # luas kontur
+
+            if minarea < area < maxarea:
+                # menghitung centroid kontur
+                cnt = contours[i]
+                M = cv2.moments(cnt)
+                cx = int(M['m10'] / M['m00'])
+                cy = int(M['m01'] / M['m00'])
+
+                if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
+                    print(area)
+
+                elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
+
+                    # mendapatkan nilai titik sudut untuk menggambar kontur persegi
+                    # x,y adalah sudut kiri atas dan w,h adalah lebar dan tinggi
+                    x, y, w, h = cv2.boundingRect(cnt)
+
+                    # membuat kotak yang melingkupi setiap kontur
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), (121,43,236), 2)
+    
+    # tracking warna biru
+    contours,hierachy = cv2.findContours(biru, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
+
+    cxx = np.zeros(len(contours))
+    cyy = np.zeros(len(contours))
+
+    for i in range(len(contours)):  # looping pada semua kontur dalam frame
+
+        if hierachy[0, i, 3] == -1:  # hierachy untuk hanya menghitung pada kontur induk
+
+            area = cv2.contourArea(contours[i])  # luas kontur
+
+            if minarea < area < maxarea:
+                # menghitung centroid kontur
+                cnt = contours[i]
+                M = cv2.moments(cnt)
+                cx = int(M['m10'] / M['m00'])
+                cy = int(M['m01'] / M['m00'])
+
+                if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
+                    print(area)
+
+                elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
+
+                    # mendapatkan nilai titik sudut untuk menggambar kontur persegi
+                    # x,y adalah sudut kiri atas dan w,h adalah lebar dan tinggi
+                    x, y, w, h = cv2.boundingRect(cnt)
+
+                    # membuat kotak yang melingkupi setiap kontur
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), (121,43,236), 2)
+
+    # tracking warna ungu
+    contours,hierachy = cv2.findContours(ungu, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
 
     cxx = np.zeros(len(contours))
