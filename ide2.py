@@ -98,7 +98,10 @@ while True :
                 cy = int(M['m01'] / M['m00'])
 
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    print(area)
+                    print("atas")
+
+                elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
+                    print("bawah")
 
                 elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
@@ -130,7 +133,10 @@ while True :
                 cy = int(M['m01'] / M['m00'])
 
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    print(area)
+                    print("atas")
+
+                elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
+                    print("bawah")
 
                 elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
@@ -162,7 +168,10 @@ while True :
                 cy = int(M['m01'] / M['m00'])
 
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    print(area)
+                    print("atas")
+
+                elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
+                    print("bawah")
 
                 elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
@@ -194,7 +203,10 @@ while True :
                 cy = int(M['m01'] / M['m00'])
 
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    print(area)
+                    print("atas")
+
+                elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
+                    print("bawah")
 
                 elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
@@ -226,8 +238,11 @@ while True :
                 cy = int(M['m01'] / M['m00'])
 
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    print(area)
+                    print("atas")
 
+                elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
+                    print("bawah")
+                    
                 elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
                     # mendapatkan nilai titik sudut untuk menggambar kontur persegi
