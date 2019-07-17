@@ -101,20 +101,20 @@ while True :
                 M = cv2.moments(cnt)
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
-
+                
+                query1 = "INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'hijau', %d, now());" % area
+                query2 = "INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'hijau', %d, now());" % area
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    with con:
-                        cursor = con.cursor()
-                        cursor.execute("INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'hijau', area, now());")
-                        con.commit()
-                        cursor.close()
+                    cursor = con.cursor()
+                    cursor.execute(query1)
+                    con.commit()
+                    print("Lebah warna hijau melewati area pertama")
 
                 elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
-                    with con:
-                        cursor = con.cursor()
-                        cursor.execute("INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'hijau', area, now());")
-                        con.commit()
-                        cursor.close()
+                    cursor = con.cursor()
+                    cursor.execute(query2)
+                    con.commit()
+                    print("Lebah warna hijau melewati area kedua")
 
                 elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
@@ -145,11 +145,19 @@ while True :
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
 
+                query1 = "INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'kuning', %d, now());" % area
+                query2 = "INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'kuning', %d, now());" % area
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    print("atas")
+                    cursor = con.cursor()
+                    cursor.execute(query1)
+                    con.commit()
+                    print("Lebah warna kuning melewati area pertama")
 
                 elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
-                    print("bawah")
+                    cursor = con.cursor()
+                    cursor.execute(query2)
+                    con.commit()
+                    print("Lebah warna kuning melewati area kedua")
 
                 elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
@@ -180,11 +188,19 @@ while True :
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
 
+                query1 = "INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'merah', %d, now());" % area
+                query2 = "INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'merah', %d, now());" % area
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    print("atas")
+                    cursor = con.cursor()
+                    cursor.execute(query1)
+                    con.commit()
+                    print("Lebah warna merah melewati area pertama")
 
                 elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
-                    print("bawah")
+                    cursor = con.cursor()
+                    cursor.execute(query2)
+                    con.commit()
+                    print("Lebah warna merah melewati area kedua")
 
                 elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
@@ -215,11 +231,19 @@ while True :
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
 
+                query1 = "INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'biru', %d, now());" % area
+                query2 = "INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'biru', %d, now());" % area
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    print("atas")
+                    cursor = con.cursor()
+                    cursor.execute(query1)
+                    con.commit()
+                    print("Lebah warna biru melewati area pertama")
 
                 elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
-                    print("bawah")
+                    cursor = con.cursor()
+                    cursor.execute(query2)
+                    con.commit()
+                    print("Lebah warna biru melewati area kedua")
 
                 elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
@@ -250,11 +274,19 @@ while True :
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
 
+                query1 = "INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'ungu', %d, now());" % area
+                query2 = "INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'ungu', %d, now());" % area
                 if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    print("atas")
+                    cursor = con.cursor()
+                    cursor.execute(query1)
+                    con.commit()
+                    print("Lebah warna ungu melewati area pertama")
 
                 elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
-                    print("bawah")
+                    cursor = con.cursor()
+                    cursor.execute(query2)
+                    con.commit()
+                    print("Lebah warna ungu melewati area kedua")
                     
                 elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
 
