@@ -4,11 +4,18 @@ import imutils
 import cv2
 
 avg = None
-video = cv2.VideoCapture("people-capture.mp4")
+# video = cv2.VideoCapture("people-capture.mp4")
+video = cv2.VideoCapture(0)
 yvalues = list()
 motion = list()
 count1 = 0
 count2 = 0
+
+fps, width, height = video.get(cv2.CAP_PROP_FPS), video.get(
+    cv2.CAP_PROP_FRAME_WIDTH), video.get(cv2.CAP_PROP_FRAME_HEIGHT)
+width = int(width)
+height = int(height)
+print(fps, width, height)
 
 def find_majority(k):
     myMap = {}
@@ -34,16 +41,16 @@ while 1:
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     # definisikan garis pertama
-    lineypos = 225
+    lineypos = 100
     cv2.line(frame, (0, lineypos), (width, lineypos), (255, 0, 0), 2)
 
     # definisikan garis kedua
-    lineypos2 = 400
-    cv2.line(frame, (0, lineypos3), (width, lineypos2), (0, 255, 0), 2)
+    lineypos2 = 300
+    cv2.line(frame, (0, lineypos2), (width, lineypos2), (0, 255, 0), 2)
 
     # definiskan range warna merah
-    l_merah = np.array([129, 57, 47])
-    u_merah = np.array([204, 230, 120])
+    l_merah = np.array([0, 81, 67])
+    u_merah = np.array([180, 106, 94])
 
     # menemukan range warna pada citra
     merah = cv2.inRange(hsv, l_merah, u_merah)
@@ -56,16 +63,16 @@ while 1:
 
     # tracking warna merah
     cnts,hierachy = cv2.findContours(merah, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
+    cv2.drawContours(frame, cnts, -1, (0, 255, 0), 3)
 
-    cv2.accumulateWeighted(gray, avg, 0.5)
-    frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
-    thresh = cv2.threshold(frameDelta, 5, 255, cv2.THRESH_BINARY)[1]
-    thresh = cv2.dilate(thresh, None, iterations=2)
-    cnts, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # cv2.accumulateWeighted(gray, avg, 0.5)
+    # frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
+    # thresh = cv2.threshold(frameDelta, 5, 255, cv2.THRESH_BINARY)[1]
+    # thresh = cv2.dilate(thresh, None, iterations=2)
+    # cnts, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     for c in cnts:
-        if cv2.contourArea(c) < 5000:
+        if cv2.contourArea(c) < 10:
             continue
         (x, y, w, h) = cv2.boundingRect(c)
         yvalues.append(y)
@@ -87,19 +94,18 @@ while 1:
             val, times = find_majority(motion)
             if val == 1 and times >= 15:
                 count1 += 1
+                print("Lebah merah masuk")
+                
             else:
                 count2 += 1
-                
+                print("Lebah merah keluar")
+
         yvalues = list()
         motion = list()
     
-    cv2.line(frame, (260, 0), (260,480), (0,255,0), 2)
-    cv2.line(frame, (420, 0), (420,480), (0,255,0), 2)	
     cv2.putText(frame, "In: {}".format(count1), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(frame, "Out: {}".format(count2), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.imshow("Frame",frame)
-    cv2.imshow("Gray",gray)
-    cv2.imshow("FrameDelta",frameDelta)
     
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
