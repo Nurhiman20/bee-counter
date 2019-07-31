@@ -49,8 +49,8 @@ while 1:
     cv2.line(frame, (0, lineypos2), (width, lineypos2), (0, 255, 0), 2)
 
     # definiskan range warna merah
-    l_merah = np.array([0, 81, 67])
-    u_merah = np.array([180, 106, 94])
+    l_merah = np.array([0, 109, 49])
+    u_merah = np.array([180, 169, 89])
 
     # menemukan range warna pada citra
     merah = cv2.inRange(hsv, l_merah, u_merah)
@@ -72,7 +72,7 @@ while 1:
     # cnts, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     for c in cnts:
-        if cv2.contourArea(c) < 10:
+        if cv2.contourArea(c) < 100:
             continue
         (x, y, w, h) = cv2.boundingRect(c)
         yvalues.append(y)
@@ -92,13 +92,17 @@ while 1:
     if flag is True:
         if (no_y > 5):
             val, times = find_majority(motion)
-            if val == 1 and times >= 15:
-                count1 += 1
-                print("Lebah merah masuk")
-                
-            else:
+            if val == 1 and times >= 10:
                 count2 += 1
-                print("Lebah merah keluar")
+                print("keluar", yvalues)
+                print(motion)
+                print(val)
+                
+            elif val == 0 and times >= 10:
+                count1 += 1
+                print("masuk", yvalues)
+                print(motion)
+                print(val)
 
         yvalues = list()
         motion = list()
