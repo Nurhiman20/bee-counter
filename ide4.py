@@ -10,11 +10,14 @@ yvalues_merah = list()
 motion_merah = list()
 yvalues_biru = list()
 motion_biru = list()
+yvalues_hijau = list()
+motion_hijau = list()
 count1 = 0
 count2 = 0
 count3 = 0
 count4 = 0
-
+count5 = 0
+count6 = 0
 
 fps, width, height = video.get(cv2.CAP_PROP_FPS), video.get(
     cv2.CAP_PROP_FRAME_WIDTH), video.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -53,15 +56,18 @@ while 1:
     lineypos2 = 300
     cv2.line(frame, (0, lineypos2), (width, lineypos2), (0, 255, 0), 2)
 
-    # definiskan range warna merah
+    # definiskan range warna
     l_merah = np.array([0, 73, 58])
     u_merah = np.array([183, 115, 84])
     l_biru = np.array([107, 19, 52])
     u_biru = np.array([132, 57, 86])
+    l_hijau = np.array([16, 10, 47])
+    u_hijau = np.array([116, 27, 74])
     
     # menemukan range warna pada citra
     merah = cv2.inRange(hsv, l_merah, u_merah)
     biru = cv2.inRange(hsv, l_biru, u_biru)
+    hijau = cv2.inRange(hsv, l_hijau, u_hijau)
 
     #morphological transformation, dilation
     kernal = np.ones((5, 5), "uint8")
@@ -71,6 +77,9 @@ while 1:
     
     biru = cv2.dilate(biru, kernal)
     res2 = cv2.bitwise_and(frame, frame, mask = biru)
+
+    hijau = cv2.dilate(hijau, kernal)
+    res2 = cv2.bitwise_and(frame, frame, mask = hijau)
 
     # tracking warna merah
     cnts,hierachy = cv2.findContours(merah, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -151,11 +160,53 @@ while 1:
 
         yvalues_biru = list()
         motion_biru = list()
+
+    # tracking warna hijau 
+    cnts_hijau,hierachy = cv2.findContours(hijau, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(frame, cnts_hijau, -1, (0, 255, 0), 3)
+
+    for e in cnts_hijau:
+        if cv2.contourArea(e) < 100:
+            continue
+        (x, y, w, h) = cv2.boundingRect(e)
+        yvalues_hijau.append(y)
+        
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        flag = False
+	
+    no_y_hijau = len(yvalues_hijau)
+    
+    if (no_y_hijau > 2):
+        difference_hijau = yvalues_hijau[no_y_hijau - 1] - yvalues_hijau[no_y_hijau - 2]
+        if(difference_hijau > 0):
+            motion_hijau.append(1)
+        else:
+            motion_hijau.append(0)
+
+    if flag is True:
+        if (no_y_hijau > 5):
+            val, times = find_majority(motion_hijau)
+            if val == 1 and times >= 10:
+                count6 += 1
+                print("keluar", yvalues_hijau)
+                print(motion_hijau)
+                print(val)
+                
+            elif val == 0 and times >= 10:
+                count5 += 1
+                print("masuk", yvalues_hijau)
+                print(motion_hijau)
+                print(val)
+
+        yvalues_hijau = list()
+        motion_hijau = list()
     
     cv2.putText(frame, "In (merah): {}".format(count1), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(frame, "Out (merah): {}".format(count2), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(frame, "In (biru): {}".format(count3), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.putText(frame, "Out (biru): {}".format(count4), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "In (hijau): {}".format(count5), (150, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "Out (hijau): {}".format(count6), (150, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.imshow("Frame",frame)
     
     key = cv2.waitKey(1) & 0xFF
