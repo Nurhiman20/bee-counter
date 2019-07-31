@@ -6,10 +6,15 @@ import cv2
 avg = None
 # video = cv2.VideoCapture("people-capture.mp4")
 video = cv2.VideoCapture(0)
-yvalues = list()
-motion = list()
+yvalues_merah = list()
+motion_merah = list()
+yvalues_biru = list()
+motion_biru = list()
 count1 = 0
 count2 = 0
+count3 = 0
+count4 = 0
+
 
 fps, width, height = video.get(cv2.CAP_PROP_FPS), video.get(
     cv2.CAP_PROP_FRAME_WIDTH), video.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -49,66 +54,108 @@ while 1:
     cv2.line(frame, (0, lineypos2), (width, lineypos2), (0, 255, 0), 2)
 
     # definiskan range warna merah
-    l_merah = np.array([0, 109, 49])
-    u_merah = np.array([180, 169, 89])
-
+    l_merah = np.array([0, 73, 58])
+    u_merah = np.array([183, 115, 84])
+    l_biru = np.array([107, 19, 52])
+    u_biru = np.array([132, 57, 86])
+    
     # menemukan range warna pada citra
     merah = cv2.inRange(hsv, l_merah, u_merah)
+    biru = cv2.inRange(hsv, l_biru, u_biru)
 
     #morphological transformation, dilation
     kernal = np.ones((5, 5), "uint8")
 
     merah = cv2.dilate(merah, kernal)
     res2 = cv2.bitwise_and(frame, frame, mask = merah)
+    
+    biru = cv2.dilate(biru, kernal)
+    res2 = cv2.bitwise_and(frame, frame, mask = biru)
 
     # tracking warna merah
     cnts,hierachy = cv2.findContours(merah, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     cv2.drawContours(frame, cnts, -1, (0, 255, 0), 3)
 
-    # cv2.accumulateWeighted(gray, avg, 0.5)
-    # frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
-    # thresh = cv2.threshold(frameDelta, 5, 255, cv2.THRESH_BINARY)[1]
-    # thresh = cv2.dilate(thresh, None, iterations=2)
-    # cnts, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
     for c in cnts:
         if cv2.contourArea(c) < 100:
             continue
         (x, y, w, h) = cv2.boundingRect(c)
-        yvalues.append(y)
+        yvalues_merah.append(y)
         
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
         flag = False
 	
-    no_y = len(yvalues)
+    no_y_merah = len(yvalues_merah)
     
-    if (no_y > 2):
-        difference = yvalues[no_y - 1] - yvalues[no_y - 2]
-        if(difference > 0):
-            motion.append(1)
+    if (no_y_merah > 2):
+        difference_merah = yvalues_merah[no_y_merah - 1] - yvalues_merah[no_y_merah - 2]
+        if(difference_merah > 0):
+            motion_merah.append(1)
         else:
-            motion.append(0)
+            motion_merah.append(0)
 
     if flag is True:
-        if (no_y > 5):
-            val, times = find_majority(motion)
+        if (no_y_merah > 5):
+            val, times = find_majority(motion_merah)
             if val == 1 and times >= 10:
                 count2 += 1
-                print("keluar", yvalues)
-                print(motion)
+                print("keluar", yvalues_merah)
+                print(motion_merah)
                 print(val)
                 
             elif val == 0 and times >= 10:
                 count1 += 1
-                print("masuk", yvalues)
-                print(motion)
+                print("masuk", yvalues_merah)
+                print(motion_merah)
                 print(val)
 
-        yvalues = list()
-        motion = list()
+        yvalues_merah = list()
+        motion_merah = list()
     
-    cv2.putText(frame, "In: {}".format(count1), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-    cv2.putText(frame, "Out: {}".format(count2), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    # tracking warna biru
+    cnts_biru,hierachy = cv2.findContours(biru, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(frame, cnts_biru, -1, (0, 255, 0), 3)
+
+    for d in cnts_biru:
+        if cv2.contourArea(d) < 100:
+            continue
+        (x, y, w, h) = cv2.boundingRect(d)
+        yvalues_biru.append(y)
+        
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        flag = False
+	
+    no_y_biru = len(yvalues_biru)
+    
+    if (no_y_biru > 2):
+        difference_biru = yvalues_biru[no_y_biru - 1] - yvalues_biru[no_y_biru - 2]
+        if(difference_biru > 0):
+            motion_biru.append(1)
+        else:
+            motion_biru.append(0)
+
+    if flag is True:
+        if (no_y_biru > 5):
+            val, times = find_majority(motion_biru)
+            if val == 1 and times >= 10:
+                count4 += 1
+                print("keluar", yvalues_biru)
+                print(motion_biru)
+                print(val)
+                
+            elif val == 0 and times >= 10:
+                count3 += 1
+                print("masuk", yvalues_biru)
+                print(motion_biru)
+                print(val)
+
+        yvalues_biru = list()
+        motion_biru = list()
+    
+    cv2.putText(frame, "In (merah): {}".format(count1), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "Out (merah): {}".format(count2), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "In (biru): {}".format(count3), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "Out (biru): {}".format(count4), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
     cv2.imshow("Frame",frame)
     
     key = cv2.waitKey(1) & 0xFF
