@@ -1,3 +1,23 @@
+<?php 
+require 'functions.php';
+
+$lebah = query("SELECT * FROM koloni2");
+
+$lebahMerahMasuk = query("SELECT * FROM koloni2 WHERE warna_lebah = 'merah' AND status = 'masuk'");
+$lebahMerahKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'merah' AND status = 'keluar'");
+
+$lebahHijauMasuk = query("SELECT * FROM koloni2 WHERE warna_lebah = 'hijau' AND status = 'masuk'");
+$lebahHijauKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'hijau' AND status = 'keluar'");
+
+$lebahBiruMasuk = query("SELECT * FROM koloni2 WHERE warna_lebah = 'biru' AND status = 'masuk'");
+$lebahBiruKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'biru' AND status = 'keluar'");
+
+$lebahKuningMasuk = query("SELECT * FROM koloni2 WHERE warna_lebah = 'kuning' AND status = 'masuk'");
+$lebahKuningKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'kuning' AND status = 'keluar'");
+
+// var_dump($lebahMerahMasuk);
+?>
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -36,12 +56,12 @@
                       <span data-feather="home"></span><i class="fas fa-home fa-lg"></i>Dashboard <span class="sr-only">(current)</span>
                     </a>
                   </li>
-                  <li class="nav-item">
+                  <!-- <li class="nav-item">
                     <a class="nav-link" href="#">
                       <span data-feather="file"></span><i class="fas fa-table fa-lg"></i>
                       Table
                     </a>
-                  </li>                  
+                  </li>                   -->
                 </ul>               
               </div>
             </nav>
@@ -63,7 +83,7 @@
                       </div>
                       <div class="col-md-8">
                           <h6>Lebah Merah</h6>
-                          <p>In : 0 <br> Out : 0</p>
+                          <p>In : <?= count($lebahMerahMasuk)?> <br> Out : <?= count($lebahMerahKeluar)?></p>
                       </div>
                     </div>                
                   </div>
@@ -76,7 +96,7 @@
                       </div>
                       <div class="col-md-8">
                           <h6>Lebah Hijau</h6>
-                          <p>In : 0 <br> Out : 0</p>
+                          <p>In : <?= count($lebahHijauMasuk)?> <br> Out : <?= count($lebahHijauKeluar)?></p>
                       </div>
                     </div>                
                   </div>
@@ -89,7 +109,7 @@
                       </div>
                       <div class="col-md-8">
                           <h6>Lebah Biru</h6>
-                          <p>In : 0 <br> Out : 0</p>
+                          <p>In : <?= count($lebahBiruMasuk)?> <br> Out : <?= count($lebahBiruKeluar)?></p>
                       </div>
                     </div>                
                   </div>
@@ -102,7 +122,7 @@
                       </div>
                       <div class="col-md-8">
                           <h6>Lebah Kuning</h6>
-                          <p>In : 0 <br> Out : 0</p>
+                          <p>In : <?= count($lebahKuningMasuk)?> <br> Out : <?= count($lebahKuningKeluar)?></p>
                       </div>
                     </div>                
                   </div>
@@ -123,24 +143,15 @@
                       </tr>
                     </thead>
                     <tbody>
+                    <?php $i = 1; ?>
+                    <?php foreach ($lebah as $row) :?>
                       <tr>
-                        <td>1</td>
-                        <td>Merah</td>
-                        <td>Keluar</td>
-                        <td>1 Agustus 2019 13:57:00</td>
+                        <td><?= $i++; ?></td>
+                        <td><?= $row["warna_lebah"]; ?></td>
+                        <td><?= $row["status"]; ?></td>
+                        <td><?= $row["waktu"]; ?></td>
                       </tr>
-                      <tr>
-                        <td>2</td>
-                        <td>Biru</td>
-                        <td>Masuk</td>
-                        <td>1 Agustus 2019 13:57:30</td>
-                      </tr>
-                      <tr>
-                        <td>3</td>
-                        <td>Kuning</td>
-                        <td>Keluar</td>
-                        <td>1 Agustus 2019 13:58:45</td>
-                      </tr>
+                      <?php endforeach; ?>                
                     </tbody>
                   </table>
                 </div>
