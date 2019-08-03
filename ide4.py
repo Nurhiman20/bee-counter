@@ -2,6 +2,8 @@ import numpy as np
 import time
 import imutils
 import cv2
+import serial
+import MySQLdb as mdb
 
 avg = None
 # video = cv2.VideoCapture("people-capture.mp4")
@@ -22,6 +24,9 @@ count5 = 0
 count6 = 0
 count7 = 0
 count8 = 0
+
+# menghubungkan dengan database
+con = mdb.connect('localhost','pi','linggarestu123','mydb');
 
 fps, width, height = video.get(cv2.CAP_PROP_FPS), video.get(
     cv2.CAP_PROP_FRAME_WIDTH), video.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -118,15 +123,23 @@ while 1:
             val, times = find_majority(motion_merah)
             if val == 1 and times >= 10:
                 count2 += 1
+                query2 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'merah', 'keluar', now());"
+                cursor = con.cursor()
+                cursor.execute(query2)
+                con.commit()
                 print("keluar", yvalues_merah)
-                print(motion_merah)
-                print(val)
+                # print(motion_merah)
+                # print(val)
                 
             elif val == 0 and times >= 10:
                 count1 += 1
+                query1 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'merah', 'masuk', now());"
+                cursor = con.cursor()
+                cursor.execute(query1)
+                con.commit()
                 print("masuk", yvalues_merah)
-                print(motion_merah)
-                print(val)
+                # print(motion_merah)
+                # print(val)
 
         yvalues_merah = list()
         motion_merah = list()
@@ -158,15 +171,23 @@ while 1:
             val, times = find_majority(motion_biru)
             if val == 1 and times >= 10:
                 count4 += 1
+                query4 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'biru', 'keluar', now());"
+                cursor = con.cursor()
+                cursor.execute(query4)
+                con.commit()
                 print("keluar", yvalues_biru)
-                print(motion_biru)
-                print(val)
+                # print(motion_biru)
+                # print(val)
                 
             elif val == 0 and times >= 10:
                 count3 += 1
+                query3 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'biru', 'masuk', now());"
+                cursor = con.cursor()
+                cursor.execute(query3)
+                con.commit()
                 print("masuk", yvalues_biru)
-                print(motion_biru)
-                print(val)
+                # print(motion_biru)
+                # print(val)
 
         yvalues_biru = list()
         motion_biru = list()
@@ -198,15 +219,23 @@ while 1:
             val, times = find_majority(motion_hijau)
             if val == 1 and times >= 10:
                 count6 += 1
+                query6 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'hijau', 'keluar', now());"
+                cursor = con.cursor()
+                cursor.execute(query6)
+                con.commit()
                 print("keluar", yvalues_hijau)
-                print(motion_hijau)
+                # print(motion_hijau)
                 print(val)
                 
             elif val == 0 and times >= 10:
                 count5 += 1
+                query5 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'hijau', 'masuk', now());"
+                cursor = con.cursor()
+                cursor.execute(query5)
+                con.commit()
                 print("masuk", yvalues_hijau)
-                print(motion_hijau)
-                print(val)
+                # print(motion_hijau)
+                # print(val)
 
         yvalues_hijau = list()
         motion_hijau = list()
@@ -238,15 +267,23 @@ while 1:
             val, times = find_majority(motion_kuning)
             if val == 1 and times >= 10:
                 count8 += 1
+                query8 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'kuning', 'keluar', now());"
+                cursor = con.cursor()
+                cursor.execute(query8)
+                con.commit()
                 print("keluar", yvalues_kuning)
-                print(motion_kuning)
-                print(val)
+                # print(motion_kuning)
+                # print(val)
                 
             elif val == 0 and times >= 10:
                 count7 += 1
+                query7 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'kuning', 'masuk', now());"
+                cursor = con.cursor()
+                cursor.execute(query7)
+                con.commit()
                 print("masuk", yvalues_kuning)
-                print(motion_kuning)
-                print(val)
+                # print(motion_kuning)
+                # print(val)
 
         yvalues_kuning = list()
         motion_kuning = list()
