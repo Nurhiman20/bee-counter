@@ -127,6 +127,46 @@ $lebahKuningKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'kuning' A
                     </div>                
                   </div>
 
+                  <div class="col-md-2"></div>
+
+                  <!-- sensor suhu -->
+                  <div class="col-md-2 card-sensor">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <div class="icon-sensor"><i class="fas fa-temperature-low"></i></div>
+                      </div>
+                      <div class="col-md-8">
+                          <h6>Suhu</h6>
+                          <p>25 &deg;C</p>
+                      </div>
+                    </div>                 
+                  </div>
+                  
+                  <!-- sensor kelembaban -->
+                  <div class="col-md-2 card-sensor">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <div class="icon-sensor"><i class="fas fa-tint"></i></div>
+                      </div>
+                      <div class="col-md-8">
+                          <h6>Kelembaban</h6>
+                          <p>30%</p>
+                      </div>
+                    </div>                
+                  </div>
+
+                  <!-- sensor intensitas cahaya -->
+                  <div class="col-md-2 card-sensor">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <div class="icon-sensor"><i class="far fa-sun"></i></div>
+                      </div>
+                      <div class="col-md-8">
+                          <h6>Intensitas Cahaya</h6>
+                          <p>80 Lux</p>
+                      </div>
+                    </div>                
+                  </div>
                 </div>
               </div>
               
