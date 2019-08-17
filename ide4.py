@@ -68,8 +68,8 @@ while 1:
     # definiskan range warna
     l_merah = np.array([0, 73, 58])
     u_merah = np.array([183, 115, 84])
-    l_biru = np.array([107, 19, 52])
-    u_biru = np.array([132, 57, 86])
+    l_biru = np.array([129, 23, 54])
+    u_biru = np.array([162, 39, 75])
     l_hijau = np.array([16, 10, 47])
     u_hijau = np.array([116, 27, 74])
     l_kuning = np.array([22, 71, 65])
