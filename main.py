@@ -1,308 +1,306 @@
-import cv2
 import numpy as np
-import serial
 import time
+import imutils
+import cv2
+import serial
 import MySQLdb as mdb
 
-cap = cv2.VideoCapture(0)
+avg = None
+# video = cv2.VideoCapture("people-capture.mp4")
+video = cv2.VideoCapture(0)
+yvalues_merah = list()
+motion_merah = list()
+yvalues_biru = list()
+motion_biru = list()
+yvalues_hijau = list()
+motion_hijau = list()
+yvalues_kuning = list()
+motion_kuning = list()
+count1 = 0
+count2 = 0
+count3 = 0
+count4 = 0
+count5 = 0
+count6 = 0
+count7 = 0
+count8 = 0
 
-fps, width, height = cap.get(cv2.CAP_PROP_FPS), cap.get(
-    cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+# menghubungkan dengan database
+con = mdb.connect('localhost','pi','linggarestu123','mydb');
+
+fps, width, height = video.get(cv2.CAP_PROP_FPS), video.get(
+    cv2.CAP_PROP_FRAME_WIDTH), video.get(cv2.CAP_PROP_FRAME_HEIGHT)
 width = int(width)
 height = int(height)
 print(fps, width, height)
 
-con = mdb.connect('localhost','pi','linggarestu123','mydb');    # menghungkan dengan database MySQL
+def find_majority(k):
+    myMap = {}
+    maximum = ( '', 0 ) # (occurring element, occurrences)
+    for n in k:
+        if n in myMap: myMap[n] += 1
+        else: myMap[n] = 1
 
-while True :
-    # mengambil citra
-    _, frame = cap.read()
+        # Keep track of maximum on the go
+        if myMap[n] > maximum[1]: maximum = (n,myMap[n])
+
+    return maximum
+
+while 1:
+    ret, frame = video.read()
+    flag = True
+    text=""
+
+    frame = imutils.resize(frame, width=500)
+    # frame = imutils.rotate(frame, angle=90)
 
     # konversi warna BGR ke HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    # definisikan area pertama
-    lineypos = 225
+    # definisikan garis pertama
+    lineypos = 100
     cv2.line(frame, (0, lineypos), (width, lineypos), (255, 0, 0), 2)
-    lineypos2 = 235
-    cv2.line(frame, (0, lineypos2), (width, lineypos2), (255, 0, 0), 2)
+
+    # definisikan garis kedua
+    lineypos2 = 300
+    cv2.line(frame, (0, lineypos2), (width, lineypos2), (0, 255, 0), 2)
+
+    # definiskan range warna
+    l_merah = np.array([0, 73, 58])
+    u_merah = np.array([183, 115, 84])
+    l_biru = np.array([129, 23, 54])
+    u_biru = np.array([162, 39, 75])
+    l_hijau = np.array([16, 10, 47])
+    u_hijau = np.array([116, 27, 74])
+    l_kuning = np.array([22, 71, 65])
+    u_kuning = np.array([39, 113, 104])
     
-    # definisikan area kedua
-    lineypos3 = 400
-    cv2.line(frame, (0, lineypos3), (width, lineypos3), (0, 255, 0), 2)
-    lineypos4 = 410
-    cv2.line(frame, (0, lineypos4), (width, lineypos4), (0, 255, 0), 2)
-    
-    # definiskan range warna hijau
-    l_hijau = np.array([34, 50, 30])
-    u_hijau = np.array([84, 255, 99])
-
-    # definiskan range warna kuning
-    l_kuning = np.array([7, 90, 116])
-    u_kuning = np.array([33, 255, 144])
-
-    # definiskan range warna merah
-    l_merah = np.array([175, 73, 71])
-    u_merah = np.array([188, 156, 151])
-
-    # definiskan range warna biru
-    l_biru = np.array([97, 57, 80])
-    u_biru = np.array([160, 255, 124])
-
-    # definiskan range warna ungu
-    l_ungu = np.array([158, 28, 65])
-    u_ungu = np.array([201, 72, 91])
-
     # menemukan range warna pada citra
-    hijau = cv2.inRange(hsv, l_hijau, u_hijau)
-    kuning = cv2.inRange(hsv, l_kuning, u_kuning)
     merah = cv2.inRange(hsv, l_merah, u_merah)
     biru = cv2.inRange(hsv, l_biru, u_biru)
-    ungu = cv2.inRange(hsv, l_ungu, u_ungu)
-    
+    hijau = cv2.inRange(hsv, l_hijau, u_hijau)
+    kuning = cv2.inRange(hsv, l_kuning, u_kuning)
+
     #morphological transformation, dilation
     kernal = np.ones((5, 5), "uint8")
-    
-    hijau = cv2.dilate(hijau, kernal)
-    res = cv2.bitwise_and(frame, frame, mask = hijau)
-    
-    kuning = cv2.dilate(kuning, kernal)
-    res1 = cv2.bitwise_and(frame, frame, mask = kuning)
-    
+
     merah = cv2.dilate(merah, kernal)
     res2 = cv2.bitwise_and(frame, frame, mask = merah)
-
+    
     biru = cv2.dilate(biru, kernal)
-    res3 = cv2.bitwise_and(frame, frame, mask = biru)
+    res2 = cv2.bitwise_and(frame, frame, mask = biru)
 
-    ungu = cv2.dilate(ungu, kernal)
-    res3 = cv2.bitwise_and(frame, frame, mask = ungu)
-
-    # batas ukuran tagging yang terbaca
-    minarea = 10
-    maxarea = 50000
+    hijau = cv2.dilate(hijau, kernal)
+    res2 = cv2.bitwise_and(frame, frame, mask = hijau)
     
-    # tracking warna hijau
-    contours,hierachy = cv2.findContours(hijau, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
-
-    cxx = np.zeros(len(contours))
-    cyy = np.zeros(len(contours))
-
-    for i in range(len(contours)):  # looping pada semua kontur dalam frame
-
-        if hierachy[0, i, 3] == -1:  # hierachy untuk hanya menghitung pada kontur induk
-
-            area = cv2.contourArea(contours[i])  # luas kontur
-
-            if minarea < area < maxarea:
-                # menghitung centroid kontur
-                cnt = contours[i]
-                M = cv2.moments(cnt)
-                cx = int(M['m10'] / M['m00'])
-                cy = int(M['m01'] / M['m00'])
-                
-                query1 = "INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'hijau', %d, now());" % area
-                query2 = "INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'hijau', %d, now());" % area
-                if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    cursor = con.cursor()
-                    cursor.execute(query1)
-                    con.commit()
-                    print("Lebah warna hijau melewati area pertama")
-
-                elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
-                    cursor = con.cursor()
-                    cursor.execute(query2)
-                    con.commit()
-                    print("Lebah warna hijau melewati area kedua")
-
-                elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
-
-                    # mendapatkan nilai titik sudut untuk menggambar kontur persegi
-                    # x,y adalah sudut kiri atas dan w,h adalah lebar dan tinggi
-                    x, y, w, h = cv2.boundingRect(cnt)
-
-                    # membuat kotak yang melingkupi setiap kontur
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (121,43,236), 2)
-    
-    # tracking warna kuning
-    contours,hierachy = cv2.findContours(kuning, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
-
-    cxx = np.zeros(len(contours))
-    cyy = np.zeros(len(contours))
-
-    for i in range(len(contours)):  # looping pada semua kontur dalam frame
-
-        if hierachy[0, i, 3] == -1:  # hierachy untuk hanya menghitung pada kontur induk
-
-            area = cv2.contourArea(contours[i])  # luas kontur
-
-            if minarea < area < maxarea:
-                # menghitung centroid kontur
-                cnt = contours[i]
-                M = cv2.moments(cnt)
-                cx = int(M['m10'] / M['m00'])
-                cy = int(M['m01'] / M['m00'])
-
-                query1 = "INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'kuning', %d, now());" % area
-                query2 = "INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'kuning', %d, now());" % area
-                if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    cursor = con.cursor()
-                    cursor.execute(query1)
-                    con.commit()
-                    print("Lebah warna kuning melewati area pertama")
-
-                elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
-                    cursor = con.cursor()
-                    cursor.execute(query2)
-                    con.commit()
-                    print("Lebah warna kuning melewati area kedua")
-
-                elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
-
-                    # mendapatkan nilai titik sudut untuk menggambar kontur persegi
-                    # x,y adalah sudut kiri atas dan w,h adalah lebar dan tinggi
-                    x, y, w, h = cv2.boundingRect(cnt)
-
-                    # membuat kotak yang melingkupi setiap kontur
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (121,43,236), 2)
+    kuning = cv2.dilate(kuning, kernal)
+    res2 = cv2.bitwise_and(frame, frame, mask = kuning)
 
     # tracking warna merah
-    contours,hierachy = cv2.findContours(merah, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
+    cnts_merah,hierachy = cv2.findContours(merah, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(frame, cnts_merah, -1, (0, 255, 0), 3)
 
-    cxx = np.zeros(len(contours))
-    cyy = np.zeros(len(contours))
+    for c in cnts_merah:
+        if cv2.contourArea(c) < 100:
+            continue
+        (x, y, w, h) = cv2.boundingRect(c)
+        yvalues_merah.append(y)
+        
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        flag = False
+	
+    no_y_merah = len(yvalues_merah)
+    
+    if (no_y_merah > 2):
+        difference_merah = yvalues_merah[no_y_merah - 1] - yvalues_merah[no_y_merah - 2]
+        if(difference_merah > 0):
+            motion_merah.append(1)
+        else:
+            motion_merah.append(0)
 
-    for i in range(len(contours)):  # looping pada semua kontur dalam frame
+    if flag is True:
+        if (no_y_merah > 5):
+            val, times = find_majority(motion_merah)
+            if val == 1 and times >= 10:
+                count2 += 1
+                query2 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'merah', 'keluar', now());"
+                cursor = con.cursor()
+                cursor.execute(query2)
+                con.commit()
+                print("keluar", yvalues_merah)
+                # print(motion_merah)
+                # print(val)
+                
+            elif val == 0 and times >= 10:
+                count1 += 1
+                query1 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'merah', 'masuk', now());"
+                cursor = con.cursor()
+                cursor.execute(query1)
+                con.commit()
+                print("masuk", yvalues_merah)
+                # print(motion_merah)
+                # print(val)
 
-        if hierachy[0, i, 3] == -1:  # hierachy untuk hanya menghitung pada kontur induk
-
-            area = cv2.contourArea(contours[i])  # luas kontur
-
-            if minarea < area < maxarea:
-                # menghitung centroid kontur
-                cnt = contours[i]
-                M = cv2.moments(cnt)
-                cx = int(M['m10'] / M['m00'])
-                cy = int(M['m01'] / M['m00'])
-
-                query1 = "INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'merah', %d, now());" % area
-                query2 = "INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'merah', %d, now());" % area
-                if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    cursor = con.cursor()
-                    cursor.execute(query1)
-                    con.commit()
-                    print("Lebah warna merah melewati area pertama")
-
-                elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
-                    cursor = con.cursor()
-                    cursor.execute(query2)
-                    con.commit()
-                    print("Lebah warna merah melewati area kedua")
-
-                elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
-
-                    # mendapatkan nilai titik sudut untuk menggambar kontur persegi
-                    # x,y adalah sudut kiri atas dan w,h adalah lebar dan tinggi
-                    x, y, w, h = cv2.boundingRect(cnt)
-
-                    # membuat kotak yang melingkupi setiap kontur
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (121,43,236), 2)
+        yvalues_merah = list()
+        motion_merah = list()
     
     # tracking warna biru
-    contours,hierachy = cv2.findContours(biru, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
+    cnts_biru,hierachy = cv2.findContours(biru, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(frame, cnts_biru, -1, (0, 255, 0), 3)
 
-    cxx = np.zeros(len(contours))
-    cyy = np.zeros(len(contours))
+    for d in cnts_biru:
+        if cv2.contourArea(d) < 100:
+            continue
+        (x, y, w, h) = cv2.boundingRect(d)
+        yvalues_biru.append(y)
+        
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        flag = False
+	
+    no_y_biru = len(yvalues_biru)
+    
+    if (no_y_biru > 2):
+        difference_biru = yvalues_biru[no_y_biru - 1] - yvalues_biru[no_y_biru - 2]
+        if(difference_biru > 0):
+            motion_biru.append(1)
+        else:
+            motion_biru.append(0)
 
-    for i in range(len(contours)):  # looping pada semua kontur dalam frame
+    if flag is True:
+        if (no_y_biru > 5):
+            val, times = find_majority(motion_biru)
+            if val == 1 and times >= 10:
+                count4 += 1
+                query4 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'biru', 'keluar', now());"
+                cursor = con.cursor()
+                cursor.execute(query4)
+                con.commit()
+                print("keluar", yvalues_biru)
+                # print(motion_biru)
+                # print(val)
+                
+            elif val == 0 and times >= 10:
+                count3 += 1
+                query3 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'biru', 'masuk', now());"
+                cursor = con.cursor()
+                cursor.execute(query3)
+                con.commit()
+                print("masuk", yvalues_biru)
+                # print(motion_biru)
+                # print(val)
 
-        if hierachy[0, i, 3] == -1:  # hierachy untuk hanya menghitung pada kontur induk
+        yvalues_biru = list()
+        motion_biru = list()
 
-            area = cv2.contourArea(contours[i])  # luas kontur
+    # tracking warna hijau 
+    cnts_hijau,hierachy = cv2.findContours(hijau, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(frame, cnts_hijau, -1, (0, 255, 0), 3)
 
-            if minarea < area < maxarea:
-                # menghitung centroid kontur
-                cnt = contours[i]
-                M = cv2.moments(cnt)
-                cx = int(M['m10'] / M['m00'])
-                cy = int(M['m01'] / M['m00'])
+    for e in cnts_hijau:
+        if cv2.contourArea(e) < 100:
+            continue
+        (x, y, w, h) = cv2.boundingRect(e)
+        yvalues_hijau.append(y)
+        
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        flag = False
+	
+    no_y_hijau = len(yvalues_hijau)
+    
+    if (no_y_hijau > 2):
+        difference_hijau = yvalues_hijau[no_y_hijau - 1] - yvalues_hijau[no_y_hijau - 2]
+        if(difference_hijau > 0):
+            motion_hijau.append(1)
+        else:
+            motion_hijau.append(0)
 
-                query1 = "INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'biru', %d, now());" % area
-                query2 = "INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'biru', %d, now());" % area
-                if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    cursor = con.cursor()
-                    cursor.execute(query1)
-                    con.commit()
-                    print("Lebah warna biru melewati area pertama")
+    if flag is True:
+        if (no_y_hijau > 5):
+            val, times = find_majority(motion_hijau)
+            if val == 1 and times >= 10:
+                count6 += 1
+                query6 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'hijau', 'keluar', now());"
+                cursor = con.cursor()
+                cursor.execute(query6)
+                con.commit()
+                print("keluar", yvalues_hijau)
+                # print(motion_hijau)
+                print(val)
+                
+            elif val == 0 and times >= 10:
+                count5 += 1
+                query5 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'hijau', 'masuk', now());"
+                cursor = con.cursor()
+                cursor.execute(query5)
+                con.commit()
+                print("masuk", yvalues_hijau)
+                # print(motion_hijau)
+                # print(val)
 
-                elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
-                    cursor = con.cursor()
-                    cursor.execute(query2)
-                    con.commit()
-                    print("Lebah warna biru melewati area kedua")
+        yvalues_hijau = list()
+        motion_hijau = list()
+    
+    # tracking warna kuning
+    cnts_kuning,hierachy = cv2.findContours(kuning, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(frame, cnts_kuning, -1, (0, 255, 0), 3)
+    
+    for f in cnts_kuning:
+        if cv2.contourArea(f) < 100:
+            continue
+        (x, y, w, h) = cv2.boundingRect(f)
+        yvalues_kuning.append(y)
+        
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        flag = False
+	
+    no_y_kuning = len(yvalues_kuning)
+    
+    if (no_y_kuning > 2):
+        difference_kuning = yvalues_kuning[no_y_kuning - 1] - yvalues_kuning[no_y_kuning - 2]
+        if(difference_kuning > 0):
+            motion_kuning.append(1)
+        else:
+            motion_kuning.append(0)
 
-                elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
+    if flag is True:
+        if (no_y_kuning > 5):
+            val, times = find_majority(motion_kuning)
+            if val == 1 and times >= 10:
+                count8 += 1
+                query8 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'kuning', 'keluar', now());"
+                cursor = con.cursor()
+                cursor.execute(query8)
+                con.commit()
+                print("keluar", yvalues_kuning)
+                # print(motion_kuning)
+                # print(val)
+                
+            elif val == 0 and times >= 10:
+                count7 += 1
+                query7 = "INSERT INTO koloni2 (id, warna_lebah, status, waktu) VALUES (NULL,'kuning', 'masuk', now());"
+                cursor = con.cursor()
+                cursor.execute(query7)
+                con.commit()
+                print("masuk", yvalues_kuning)
+                # print(motion_kuning)
+                # print(val)
 
-                    # mendapatkan nilai titik sudut untuk menggambar kontur persegi
-                    # x,y adalah sudut kiri atas dan w,h adalah lebar dan tinggi
-                    x, y, w, h = cv2.boundingRect(cnt)
-
-                    # membuat kotak yang melingkupi setiap kontur
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (121,43,236), 2)
-
-    # tracking warna ungu
-    contours,hierachy = cv2.findContours(ungu, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
-
-    cxx = np.zeros(len(contours))
-    cyy = np.zeros(len(contours))
-
-    for i in range(len(contours)):  # looping pada semua kontur dalam frame
-
-        if hierachy[0, i, 3] == -1:  # hierachy untuk hanya menghitung pada kontur induk
-
-            area = cv2.contourArea(contours[i])  # luas kontur
-
-            if minarea < area < maxarea:
-                # menghitung centroid kontur
-                cnt = contours[i]
-                M = cv2.moments(cnt)
-                cx = int(M['m10'] / M['m00'])
-                cy = int(M['m01'] / M['m00'])
-
-                query1 = "INSERT INTO areaSatu (id, warna1, contourArea1, waktu1) VALUES (NULL,'ungu', %d, now());" % area
-                query2 = "INSERT INTO areaDua (id, warna2, contourArea2, waktu2) VALUES (NULL,'ungu', %d, now());" % area
-                if lineypos < cy < lineypos2:   # kirim data saat melewati area pertama
-                    cursor = con.cursor()
-                    cursor.execute(query1)
-                    con.commit()
-                    print("Lebah warna ungu melewati area pertama")
-
-                elif lineypos3 < cy < lineypos4:    # kirim data saat melewati area kedua
-                    cursor = con.cursor()
-                    cursor.execute(query2)
-                    con.commit()
-                    print("Lebah warna ungu melewati area kedua")
-                    
-                elif cy > lineypos:  # menyeleksi kontur yang sudah melewati garis
-
-                    # mendapatkan nilai titik sudut untuk menggambar kontur persegi
-                    # x,y adalah sudut kiri atas dan w,h adalah lebar dan tinggi
-                    x, y, w, h = cv2.boundingRect(cnt)
-
-                    # membuat kotak yang melingkupi setiap kontur
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (121,43,236), 2)
-
-    cv2.imshow("frame", frame)
-
-    # menutup frame / program
-    key = cv2.waitKey(1)
-    if key == 27:
+        yvalues_kuning = list()
+        motion_kuning = list()
+    
+    cv2.putText(frame, "In (merah): {}".format(count1), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "Out (merah): {}".format(count2), (10, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "In (biru): {}".format(count3), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "Out (biru): {}".format(count4), (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "In (hijau): {}".format(count5), (150, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "Out (hijau): {}".format(count6), (150, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "In (kuning): {}".format(count7), (150, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.putText(frame, "Out (kuning): {}".format(count8), (150, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+    cv2.imshow("Frame",frame)
+    
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord('q'):
         break
-
-cap.release()
+    
+video.release()
 cv2.destroyAllWindows()
