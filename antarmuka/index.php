@@ -2,6 +2,7 @@
 require 'functions.php';
 
 $lebah = query("SELECT * FROM koloni2");
+$sensor = query("SELECT * FROM sensor ORDER BY id DESC LIMIT 1;");
 
 $lebahMerahMasuk = query("SELECT * FROM koloni2 WHERE warna_lebah = 'merah' AND status = 'masuk'");
 $lebahMerahKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'merah' AND status = 'keluar'");
@@ -15,7 +16,7 @@ $lebahBiruKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'biru' AND s
 $lebahKuningMasuk = query("SELECT * FROM koloni2 WHERE warna_lebah = 'kuning' AND status = 'masuk'");
 $lebahKuningKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'kuning' AND status = 'keluar'");
 
-// var_dump($lebahMerahMasuk);
+// var_dump($sensor);
 ?>
 
 <!doctype html>
@@ -137,7 +138,7 @@ $lebahKuningKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'kuning' A
                       </div>
                       <div class="col-md-8">
                           <h6>Suhu</h6>
-                          <p>25 &deg;C</p>
+                          <p><?= $sensor[0]["suhu"]; ?> &deg;C</p>
                       </div>
                     </div>                 
                   </div>
@@ -150,7 +151,7 @@ $lebahKuningKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'kuning' A
                       </div>
                       <div class="col-md-8">
                           <h6>Kelembaban</h6>
-                          <p>30%</p>
+                          <p><?= $sensor[0]["kelembaban"]; ?>%</p>
                       </div>
                     </div>                
                   </div>
@@ -163,7 +164,7 @@ $lebahKuningKeluar = query("SELECT * FROM koloni2 WHERE warna_lebah = 'kuning' A
                       </div>
                       <div class="col-md-8">
                           <h6>Intensitas Cahaya</h6>
-                          <p>80 Lux</p>
+                          <p><?= $sensor[0]["intensitas_cahaya"]; ?> Lux</p>
                       </div>
                     </div>                
                   </div>
